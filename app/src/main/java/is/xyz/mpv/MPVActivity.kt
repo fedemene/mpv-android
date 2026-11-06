@@ -249,6 +249,35 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private var playbackHasStarted = false
     private var onloadCommands = mutableListOf<Array<String>>()
 
+    // Tracking state for watched files (1 = started, 2 = >90% completed)
+    private var currentTrackedPath: String? = null
+    private var currentTrackedState: Int = 0
+
+    private fun updateFileWatchState(newState: Int) {
+        val rawPath = MPVLib.getPropertyString("path") ?: return
+        if (rawPath == currentTrackedPath && currentTrackedState >= newState) return
+
+        val prefs = getDefaultSharedPreferences(applicationContext)
+        val decodedPath = Uri.decode(rawPath)
+        val fileName = decodedPath.substringAfterLast('/')
+
+        val keyName = "watched_state_name_$fileName"
+        val keyPath = "watched_state_path_$rawPath"
+
+        val existing = maxOf(prefs.getInt(keyName, 0), prefs.getInt(keyPath, 0))
+        val targetState = maxOf(existing, newState)
+
+        currentTrackedPath = rawPath
+        currentTrackedState = targetState
+
+        if (targetState > existing) {
+            prefs.edit()
+                .putInt(keyName, targetState)
+                .putInt(keyPath, targetState)
+                .apply()
+        }
+    }
+
     // Activity lifetime
 
     override fun onCreate(icicle: Bundle?) {
@@ -1981,6 +2010,13 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         if (psc.update(property, value))
             updateMediaSession()
 
+        if (property == "time-pos" && currentTrackedState < 2) {
+            val dur = psc.durationSec
+            if (dur > 0 && value >= (dur * 0.90)) {
+                updateFileWatchState(2)
+            }
+        }
+
         if (!activityIsForeground) return
         eventUiHandler.post { eventPropertyUi(property, value) }
     }
@@ -2004,6 +2040,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
     override fun event(eventId: Int) {
         if (eventId == MpvEvent.MPV_EVENT_END_FILE) {
+            if (MPVLib.getPropertyBoolean("eof-reached") == true) {
+                updateFileWatchState(2)
+            }
             psc.eof()
             updateMediaSession()
         }
@@ -2012,6 +2051,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             finishWithResult(if (playbackHasStarted) RESULT_OK else RESULT_CANCELED)
 
         if (eventId == MpvEvent.MPV_EVENT_START_FILE) {
+            currentTrackedPath = null
+            currentTrackedState = 0
+            updateFileWatchState(1)
+
             val cmds = onloadCommands.toTypedArray()
             onloadCommands.clear()
             for (c in cmds)
