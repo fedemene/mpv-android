@@ -151,6 +151,11 @@
     <string name="pref_edit_mpv_conf">Modifica mpv.conf</string>
     <string name="pref_edit_mpv_conf_message">Puoi modificare direttamente qua la configurazione di mpv.</string>
 
+    <string name="pref_sub_scale_title">Scala sottotitoli (sub-scale)</string>
+    <string name="pref_sub_scale_summary">Scala attuale: %sx (mpv.conf)</string>
+    <string name="pref_sub_scale_summary_default">Scala attuale: %sx (predefinito)</string>
+    <string name="pref_sub_scale_value">%sx</string>
+
     <string name="pref_edit_input_conf">Modifica input.conf</string>
     <string name="pref_edit_input_conf_message">Puoi modificare qua input.conf, utile soprattutto per telecomandi e tastiere.\n\nImportante: mpv-android ha alcuni tasti scritti nel codice che non possono essere ridefiniti qui, es. \'j\' per cambiare sottotitoli.</string>
 

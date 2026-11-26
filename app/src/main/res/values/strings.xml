@@ -199,6 +199,11 @@
     <string name="pref_edit_mpv_conf">Edit mpv.conf</string>
     <string name="pref_edit_mpv_conf_message">You can directly edit mpv\'s configuration here.</string>
 
+    <string name="pref_sub_scale_title">Subtitle scale (sub-scale)</string>
+    <string name="pref_sub_scale_summary">Current scale: %sx (mpv.conf)</string>
+    <string name="pref_sub_scale_summary_default">Current scale: %sx (default)</string>
+    <string name="pref_sub_scale_value">%sx</string>
+
     <string name="pref_edit_input_conf">Edit input.conf</string>
     <string name="pref_edit_input_conf_message">You can edit input.conf here, this is mainly useful for TV remotes and keyboards.\n\nImportant: mpv-android has some hardcoded keys which can\'t be redefined here, e.g. \'j\' to cycle subtitles.</string>
 

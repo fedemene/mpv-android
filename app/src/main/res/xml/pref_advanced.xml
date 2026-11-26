@@ -8,6 +8,11 @@
         android:summary="@string/pref_gpu_next_summary"
         android:title="@string/pref_gpu_next_title" />
 
+    <is.xyz.mpv.preferences.SubScaleDialogPreference
+        android:key="sub_scale_conf"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_sub_scale_title" />
+
     <is.xyz.mpv.preferences.ConfigEditDialogPreference
         app:iconSpaceReserved="false"
         app:filename="mpv.conf"

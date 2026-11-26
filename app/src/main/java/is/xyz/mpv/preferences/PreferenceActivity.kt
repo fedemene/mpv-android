@@ -158,5 +158,10 @@ class PreferenceActivity : AppCompatActivity(),
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.pref_advanced, rootKey)
         }
+
+        override fun onResume() {
+            super.onResume()
+            findPreference<SubScaleDialogPreference>("sub_scale_conf")?.refreshSummary()
+        }
     }
 }

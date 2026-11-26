@@ -58,6 +58,7 @@ class ConfigEditDialogPreference(
         else
             configFile.writeText(content)
         setUnsaved(false)
+        preferenceManager?.findPreference<SubScaleDialogPreference>("sub_scale_conf")?.refreshSummary()
     }
 
     private fun setUnsaved(state: Boolean) {
