@@ -6,22 +6,28 @@
 
 package is.xyz.filepicker;
 
+import is.xyz.mpv.PlaybackTracker;
 import is.xyz.mpv.R;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import java.io.File;
@@ -146,6 +152,14 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
         if (mCurrentPath == null)
             mCurrentPath = getRoot();
         refresh(mCurrentPath);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -299,8 +313,45 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
     @Override
     public void onBindViewHolder(@NonNull DirViewHolder vh, int position, @NonNull T data) {
         vh.file = data;
-        vh.icon.setVisibility(isDir(data) ? View.VISIBLE : View.GONE);
+        final boolean dir = isDir(data);
+        vh.icon.setVisibility(dir ? View.VISIBLE : View.GONE);
         vh.text.setText(getName(data));
+        if (!dir && vh instanceof FileViewHolder) {
+            bindFileStatus((FileViewHolder) vh, data);
+        }
+    }
+
+    private void bindFileStatus(@NonNull FileViewHolder vh, @NonNull T data) {
+        final Context ctx = vh.itemView.getContext();
+        final PlaybackTracker.PlaybackStatus status = PlaybackTracker.getStatus(ctx, pathToString(data));
+        if (vh.statusBadge == null)
+            return;
+
+        vh.statusBadge.setVisibility(View.VISIBLE);
+        switch (status) {
+            case PLAYING:
+                vh.statusBadge.setText(R.string.playback_status_playing);
+                vh.statusBadge.setTextColor(ContextCompat.getColor(ctx, R.color.status_playing_text));
+                vh.statusBadge.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.status_playing_bg)));
+                vh.text.setTextColor(ContextCompat.getColor(ctx, R.color.mx_text_playing));
+                vh.text.setTypeface(null, Typeface.BOLD);
+                break;
+            case PLAYED:
+                vh.statusBadge.setText(R.string.playback_status_played);
+                vh.statusBadge.setTextColor(ContextCompat.getColor(ctx, R.color.status_played_text));
+                vh.statusBadge.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.status_played_bg)));
+                vh.text.setTextColor(ContextCompat.getColor(ctx, R.color.mx_text_played));
+                vh.text.setTypeface(null, Typeface.NORMAL);
+                break;
+            case NEW:
+            default:
+                vh.statusBadge.setText(R.string.playback_status_new);
+                vh.statusBadge.setTextColor(ContextCompat.getColor(ctx, R.color.status_new_text));
+                vh.statusBadge.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.status_new_bg)));
+                vh.text.setTextColor(ContextCompat.getColor(ctx, R.color.mx_text_primary));
+                vh.text.setTypeface(null, Typeface.NORMAL);
+                break;
+        }
     }
 
 
@@ -527,8 +578,11 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
 
     public class FileViewHolder extends DirViewHolder {
 
+        public final TextView statusBadge;
+
         public FileViewHolder(View v) {
             super(v);
+            statusBadge = (TextView) v.findViewById(R.id.playback_status);
         }
 
         /**
@@ -547,7 +601,36 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
          * @param v The view that was clicked.
          */
         @Override
-        public boolean onLongClick(View v) { return false; }
+        public boolean onLongClick(View v) {
+            if (file == null || isDir(file))
+                return false;
+            final Context ctx = v.getContext();
+            final String key = pathToString(file);
+            PopupMenu menu = new PopupMenu(ctx, v);
+            menu.getMenu().add(Menu.NONE, 1, 1, R.string.playback_mark_new);
+            menu.getMenu().add(Menu.NONE, 2, 2, R.string.playback_mark_playing);
+            menu.getMenu().add(Menu.NONE, 3, 3, R.string.playback_mark_played);
+            menu.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case 1:
+                        PlaybackTracker.setStatus(ctx, key, PlaybackTracker.PlaybackStatus.NEW);
+                        break;
+                    case 2:
+                        PlaybackTracker.setStatus(ctx, key, PlaybackTracker.PlaybackStatus.PLAYING);
+                        break;
+                    case 3:
+                        PlaybackTracker.setStatus(ctx, key, PlaybackTracker.PlaybackStatus.PLAYED);
+                        break;
+                    default:
+                        return false;
+                }
+                if (mAdapter != null)
+                    mAdapter.notifyDataSetChanged();
+                return true;
+            });
+            menu.show();
+            return true;
+        }
     }
 
 }

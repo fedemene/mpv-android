@@ -8,6 +8,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
+        applicationId "is.xyz.mpv.fork"
         minSdkVersion 23
         targetSdk 36
 

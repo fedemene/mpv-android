@@ -24,19 +24,26 @@
         android:adjustViewBounds="true"
         android:scaleType="center"
         app:srcCompat="@drawable/nnf_ic_folder_black_48dp"
-        app:tint="?attr/colorAccent"
+        app:tint="@color/mx_folder_tint"
         android:visibility="visible"
         tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@android:id/text1"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:minHeight="?listPreferredItemHeight"
         android:gravity="center_vertical"
-        android:padding="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="@color/mx_text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:text="@string/nnf_name" />
 
 </LinearLayout>

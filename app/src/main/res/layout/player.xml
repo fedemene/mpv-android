@@ -27,7 +27,7 @@
             android:layout_marginTop="60dp"
             android:layout_marginRight="24dp"
             android:layout_marginBottom="60dp"
-            android:background="#bf000000"
+            android:background="#cc10141a"
             android:orientation="vertical">
 
             <LinearLayout
@@ -107,6 +107,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="100"
                     android:minHeight="24dp"
+                    android:progressTint="@color/mx_seekbar_accent"
+                    android:thumbTint="@color/mx_seekbar_accent"
                     android:progressBackgroundTint="@color/tint_seekbar_bg" />
 
                 <TextView
@@ -221,8 +223,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:alpha="0.5"
-            android:background="#bf000000"
+            android:alpha="0.85"
+            android:background="#cc10141a"
             android:orientation="horizontal">
 
             <ImageButton

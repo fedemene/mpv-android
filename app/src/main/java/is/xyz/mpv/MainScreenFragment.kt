@@ -130,7 +130,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             setItems(DEBUG_ACTIVITIES) { dialog, idx ->
                 dialog.dismiss()
                 val intent = Intent(Intent.ACTION_MAIN)
-                intent.setClassName(context, "${context.packageName}.${DEBUG_ACTIVITIES[idx]}")
+                intent.setClassName(context, "is.xyz.mpv.${DEBUG_ACTIVITIES[idx]}")
                 startActivity(intent)
             }
             create().show()

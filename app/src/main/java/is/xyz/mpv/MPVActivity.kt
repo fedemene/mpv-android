@@ -188,6 +188,15 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private var smoothSeekGesture = false
     /* * */
 
+    /* Playback status tracking */
+    private var initialIntentUri: String? = null
+    private var initialResolvedPath: String? = null
+    private var currentPlayingPath: String? = null
+    private var currentOriginalUri: String? = null
+    @Volatile private var currentFileLoaded = false
+    @Volatile private var currentFileReachedEof = false
+    @Volatile private var manualFileSwitch = false
+
     @SuppressLint("ClickableViewAccessibility")
     private fun initListeners() {
         with (binding) {
@@ -302,6 +311,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             return
         }
 
+        initialIntentUri = if (intent.data?.scheme == "content") intent.data?.toString() else null
+        initialResolvedPath = filepath
+
         player.addObserver(this)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
@@ -389,6 +401,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         if (!activityIsForeground && didResumeBackgroundPlayback) {
             if (this.newIntentReplace) {
+                initialIntentUri = if (intent.data?.scheme == "content") intent.data?.toString() else null
+                initialResolvedPath = filepath
+                manualFileSwitch = true
                 MPVLib.command(arrayOf("loadfile", filepath, "replace"))
                 showToast(getString(R.string.notice_file_play))
             } else {
@@ -397,6 +412,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
             moveTaskToBack(true)
         } else {
+            initialIntentUri = if (intent.data?.scheme == "content") intent.data?.toString() else null
+            initialResolvedPath = filepath
+            manualFileSwitch = true
             MPVLib.command(arrayOf("loadfile", filepath))
         }
     }
@@ -1038,8 +1056,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         }
     }
 
-    private fun playlistPrev() = MPVLib.command(arrayOf("playlist-prev"))
-    private fun playlistNext() = MPVLib.command(arrayOf("playlist-next"))
+    private fun playlistPrev() {
+        manualFileSwitch = true
+        MPVLib.command(arrayOf("playlist-prev"))
+    }
+    private fun playlistNext() {
+        manualFileSwitch = true
+        MPVLib.command(arrayOf("playlist-next"))
+    }
 
     private fun showToast(msg: String, cancel: Boolean = false) {
         if (cancel)
@@ -1278,6 +1302,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
 
             override fun onItemPicked(item: MPVView.PlaylistItem) {
+                manualFileSwitch = true
                 MPVLib.setPropertyInt("playlist-pos", item.index)
                 dialog.dismiss()
             }
@@ -1968,6 +1993,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 PlaybackStateCompat.SHUFFLE_MODE_NONE)
         } else if (property == "mute") {
             updateAudioPresence()
+        } else if (property == "eof-reached" && value) {
+            currentFileReachedEof = true
         }
 
         if (metaUpdated || property == "mute")
@@ -2004,6 +2031,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
     override fun event(eventId: Int) {
         if (eventId == MpvEvent.MPV_EVENT_END_FILE) {
+            val nearEnd = psc.duration <= 5000L || psc.position >= psc.duration - 4000L
+            val finishedNaturally = currentFileLoaded &&
+                (currentFileReachedEof || (!isFinishing && !manualFileSwitch && nearEnd))
+            if (finishedNaturally) {
+                PlaybackTracker.markPlayed(applicationContext, currentPlayingPath, currentOriginalUri)
+            }
+            currentFileLoaded = false
+            currentFileReachedEof = false
             psc.eof()
             updateMediaSession()
         }
@@ -2012,6 +2047,13 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             finishWithResult(if (playbackHasStarted) RESULT_OK else RESULT_CANCELED)
 
         if (eventId == MpvEvent.MPV_EVENT_START_FILE) {
+            currentFileLoaded = false
+            currentFileReachedEof = false
+            manualFileSwitch = false
+            val path = MPVLib.getPropertyString("path")
+            currentPlayingPath = path
+            currentOriginalUri = if (path != null && path == initialResolvedPath) initialIntentUri else null
+
             val cmds = onloadCommands.toTypedArray()
             onloadCommands.clear()
             for (c in cmds)
@@ -2021,6 +2063,16 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
 
             playbackHasStarted = true
+        }
+
+        if (eventId == MpvEvent.MPV_EVENT_FILE_LOADED) {
+            currentFileLoaded = true
+            val path = MPVLib.getPropertyString("path") ?: currentPlayingPath
+            currentPlayingPath = path
+            if (currentOriginalUri == null && path != null && path == initialResolvedPath) {
+                currentOriginalUri = initialIntentUri
+            }
+            PlaybackTracker.markPlaying(applicationContext, path, currentOriginalUri)
         }
 
         if (!activityIsForeground) return

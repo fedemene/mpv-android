@@ -212,4 +212,10 @@
     <!-- File picker -->
     <string name="nnf_name">Name</string>
     <string name="nnf_permission_external_write_denied">Permission to access file system denied</string>
+    <string name="playback_status_new">New</string>
+    <string name="playback_status_playing">Playing</string>
+    <string name="playback_status_played">Played</string>
+    <string name="playback_mark_new">Mark as New</string>
+    <string name="playback_mark_playing">Mark as Playing</string>
+    <string name="playback_mark_played">Mark as Played</string>
 </resources>

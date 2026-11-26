@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="primary" type="color">#722b72</item>
-    <item name="primary_dark" type="color">@color/primary</item>
-    <item name="accent" type="color">@color/primary</item>
+    <!-- MX Player-inspired high-contrast dark blue & slate palette -->
+    <color name="primary">#1565C0</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="accent">#1976D2</color>
 
-    <color name="tint_normal">#ffffff</color>
-    <color name="tint_disabled">#3c3c3c</color>
+    <color name="mx_background">#12161C</color>
+    <color name="mx_surface">#1B222C</color>
+    <color name="mx_divider">#242D3A</color>
+    <color name="mx_folder_tint">#42A5F5</color>
+    <color name="mx_seekbar_accent">#29B6F6</color>
+
+    <color name="mx_text_primary">#F5F7FA</color>
+    <color name="mx_text_playing">#FFFFFF</color>
+    <color name="mx_text_played">#90A4AE</color>
+
+    <!-- File playback status badges -->
+    <color name="status_new_bg">#1A3A5C</color>
+    <color name="status_new_text">#90CAF9</color>
+    <color name="status_playing_bg">#4A3000</color>
+    <color name="status_playing_text">#FFD54F</color>
+    <color name="status_played_bg">#173626</color>
+    <color name="status_played_text">#81C784</color>
+
+    <color name="tint_normal">#FFFFFF</color>
+    <color name="tint_disabled">#6E7B8B</color>
 
     <color name="alpha_disabled">#85000000</color>
     <color name="alpha24pct">#3c000000</color>
     <color name="alpha12pct">#1e000000</color>
 
     <color name="tint_btn_bg_nofocus">#00000000</color>
-    <color name="tint_btn_bg_focused">#807F7FB2</color>
+    <color name="tint_btn_bg_focused">#8042A5F5</color>
 
-    <color name="tint_seekbar_bg">#8A8A8A</color>
+    <color name="tint_seekbar_bg">#546E7A</color>
 
     <!-- 12% black in LIGHT THEME -->
     <color name="nnf_light_separator_color">#1e000000</color>

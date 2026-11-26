@@ -163,4 +163,10 @@
     <!-- File picker -->
     <string name="nnf_name">Nome</string>
     <string name="nnf_permission_external_write_denied">Autorizzazione per accedere al file system negata</string>
+    <string name="playback_status_new">Nuovo</string>
+    <string name="playback_status_playing">In riproduzione</string>
+    <string name="playback_status_played">Riprodotto</string>
+    <string name="playback_mark_new">Segna come Nuovo</string>
+    <string name="playback_mark_playing">Segna come In riproduzione</string>
+    <string name="playback_mark_played">Segna come Riprodotto</string>
 </resources>
