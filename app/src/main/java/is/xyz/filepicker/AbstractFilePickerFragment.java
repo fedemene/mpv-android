@@ -316,12 +316,12 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
         final boolean dir = isDir(data);
         vh.icon.setVisibility(dir ? View.VISIBLE : View.GONE);
         vh.text.setText(getName(data));
-        if (!dir && vh instanceof FileViewHolder) {
-            bindFileStatus((FileViewHolder) vh, data);
+        if (!dir) {
+            bindFileStatus(vh, data);
         }
     }
 
-    private void bindFileStatus(@NonNull FileViewHolder vh, @NonNull T data) {
+    private void bindFileStatus(@NonNull DirViewHolder vh, @NonNull T data) {
         final Context ctx = vh.itemView.getContext();
         final PlaybackTracker.PlaybackStatus status = PlaybackTracker.getStatus(ctx, pathToString(data));
         if (vh.statusBadge == null)
@@ -547,6 +547,7 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
 
         public final View icon;
         public final TextView text;
+        public final TextView statusBadge;
         public T file;
 
         public DirViewHolder(View v) {
@@ -555,6 +556,7 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
             v.setOnLongClickListener(this);
             icon = v.findViewById(R.id.item_icon);
             text = (TextView) v.findViewById(android.R.id.text1);
+            statusBadge = (TextView) v.findViewById(R.id.playback_status);
         }
 
         /**
@@ -578,11 +580,8 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
 
     public class FileViewHolder extends DirViewHolder {
 
-        public final TextView statusBadge;
-
         public FileViewHolder(View v) {
             super(v);
-            statusBadge = (TextView) v.findViewById(R.id.playback_status);
         }
 
         /**
